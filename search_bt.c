@@ -113,6 +113,13 @@ btn* sbt_findr(btn *node, t_elem_btree value, int cmp (t_elem_btree, t_elem_btre
     }
 }
 
+// toStr devuelve el contenido de un nodo como string
+// asume que t_elem_tree es un número entero
+void btn_intToStr(btn* node, char* str) {
+    if (!node) return;
+    sprintf(str, "(%03d %03d)", node->value->temperature , node->value->minute);
+}
+
 /**
  * DE USO INTERNO para dibujar un árbol.
  */

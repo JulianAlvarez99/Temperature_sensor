@@ -16,15 +16,18 @@ DE LA COLA SOLO ME IMPRIME UN CERO***/
 
 int main()
 {
-    stack* day_measures = NULL;
+    stack* day_measures = stack_new();
     sll_node* week_measures = NULL;
     btn* tree_measures = NULL;
-    queue* line_measures = NULL;
+    queue* line_measures = queue_new(1440);
 
 
-    day_measures = stack_set_temperature();
+    stack_set_temperature(&day_measures);
+
+    stack_print(day_measures); /// imprime el mismo valor
+
     sll_add_day_measures(&week_measures,day_measures);
-    sbt_insert_value(&tree_measures,stack_top(day_measures),btn_measures_cmp(stack_pop(&day_measures->head),stack_top(day_measures)));
+    sbt_insert_value(&tree_measures,stack_top(day_measures),btn_measures_cmp); /***/ ///SE MODIFICÓ EL PARAMETRO 3 DE ESTA FUNCION
     queue_measures_soarted(&line_measures,tree_measures);
     queue_print(line_measures);
 
@@ -35,3 +38,6 @@ int main()
 
     return 0;
 }
+
+/*printf("\n%10s: \n", "Arbol");
+    btn_print(root, btn_intToStr);*/

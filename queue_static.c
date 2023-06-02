@@ -38,8 +38,8 @@ int queue_isfull (queue* q)
 
 int queue_isempty (queue* q)
 {
-    //return (q->count == 0)?1:0;
-    return q->count == 0;
+    return (q->count == 0)?1:0;
+    //return q->count == 0;
 }
 
 void enqueue (queue* q, t_elemq elem)

@@ -59,7 +59,7 @@ int stack_push(stack* s, t_elems value)
     return result;
 }
 
-t_elems stack_pop(stack_node ** head)
+/*t_elems stack_pop(stack_node ** head)
 {
     t_elems result = NULL;
 
@@ -75,6 +75,22 @@ t_elems stack_pop(stack_node ** head)
     free(*head);
     *head = next_node;
     return result;
+}*/
+
+t_elems stack_pop(stack* s)
+{
+    t_elems result = NULL;
+
+    if (s != NULL)
+    {
+        stack_node* aux = s->head;
+        result = aux->value;
+        s->head = aux->next;
+        free(aux);
+
+        s->count--;
+    }
+    return result;
 }
 
 t_elems stack_top(stack* s)
@@ -85,4 +101,45 @@ t_elems stack_top(stack* s)
 int stack_get_size (stack* s)
 {
     return s->count;
+}
+
+int stack_isempty (stack* s)
+{
+    return (s->count == 0)?1:0;
+
+}
+
+
+void prt(t_elems e)
+{
+    printf("temperatura = %d \t minuto = %d\n", e->temperature, e->minute);
+}
+
+/*void stack_print(stack* s, void prt (t_elems))
+{
+    if (!stack_isempty(s))
+    {
+        t_elems e = (t_elems)malloc(sizeof(reading));
+        e = stack_pop(s);
+        prt(e);
+        stack_print(s, prt);
+        stack_push(s, e);
+    }
+}*/
+
+void stack_print(stack* s)
+{
+    stack* aux_stack = stack_new();
+
+    if(!stack_isempty(s))
+    {
+        stack_push(aux_stack,stack_top(s));
+        prt(stack_pop(s));
+        stack_print(s);
+    }
+
+    while(!stack_isempty(aux_stack))
+    {
+        stack_push(s,stack_pop(aux_stack));
+    }
 }
