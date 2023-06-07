@@ -3,29 +3,9 @@
 #include <string.h>
 #include "search_bt.h"
 
-int btn_measures_cmp(t_elem_btree a, t_elem_btree b)
-{
-    if(a->minute == b->minute)
-    {
-        return(a->temperature - b->temperature);
-    }
-    else
-        return(a->minute - b->minute);
-}
-
 /**
- * Devuelve el valor máximo entre 2 enteros.
- * Función auxiliar utilizada en height.
- */
-t_elem_btree _max_elem (t_elem_btree a, t_elem_btree b, int cmp (t_elem_btree, t_elem_btree) )
-{
-    return (cmp(a, b) > 0) ? a : b;
-}
-
-
-/**
- * Crea un nodo de un BTN en base a un valor t_elem_btree
- */
+  BTN_NEW Crea un nodo de un BTN en base a un valor t_elem_btree
+ **/
 btn* btn_new(t_elem_btree value)
 {
     btn* node = (btn*)malloc(sizeof(btn));
@@ -36,6 +16,10 @@ btn* btn_new(t_elem_btree value)
 
     return node;
 }
+
+/**
+BTN_FREE LIBERA LA MEMORIA DE UN BTN
+**/
 
 void btn_free(btn** node)
 {
@@ -49,138 +33,128 @@ void btn_free(btn** node)
     free(*node);
 }
 
+/**
+BTN_MEASURES_CMP COMPARA 2 T_ELEM_BTREE, SI COINCIDEN EN EL MISMO MINUTO, DESEMPATAN EN LA COMPARACION DE SUS TEMPERATURAS
+FUNCION AUXILIAR PARA ORDENAR Y CREAR EL SBT
+**/
+
+int btn_measures_cmp(t_elem_btree a, t_elem_btree b)
+{
+    if(a.minute == b.minute)
+    {
+        return(a.temperature - b.temperature);
+    }
+    else
+        return(a.minute - b.minute);
+}
 
 /**
+ * Funcion enmascarada
  * Agrega un valor a un árbol binario de búsqueda (SBT)
- * (no agrega valores repetidos)
+ * (agrega valores repetidos)
  * Parámetros:
  *          **node: debe ser la dirección de memoria (en la estructura del padre
  * o la raíz) que donde se encuentra el puntero al nodo del subárbol donde se
  * va a insertar
- *          value: el valor a agregar.
- * Devuelve:
- *  1 si pudo insertar
- *  0 si no pudo insertar
+ *          value: t_elem_btree a agregar.
+ *          cmp: funcion auxiliar con criterio para insertar los t_elem_btree
  */
 
-int sbt_insert_value(btn **node, t_elem_btree value, int cmp (t_elem_btree, t_elem_btree))
+void _sbt_insert_value(btn **node, t_elem_btree value, int cmp (t_elem_btree, t_elem_btree))
 {
-    if (node == NULL) return 0;
-    int result;
+    if (node == NULL) return;
 
     if((*node)==NULL)
     {
         *node = btn_new(value);
-        result = 1;
     }
     else
     {
-        if(cmp((*node)->value, value)>0)
+        if(cmp((*node)->value, value)<0)
         {
-            result = sbt_insert_value(&(*node)->left,value,cmp);
+            _sbt_insert_value(&(*node)->left,value,cmp);
         }
-        else if (cmp((*node)->value,value)<0)
+        else if (cmp((*node)->value,value)>0)
         {
-            result = sbt_insert_value(&(*node)->right,value,cmp);
+            _sbt_insert_value(&(*node)->right,value,cmp);
+        }
+    }
+}
+
+/**
+Funcion similar a imprimir el contenido de una pila, el unico cambio que se realiza es el llamado en vez de a una funcion de impresion,
+se realiza el llamado _sbt_insert_value el cual inserta los t_elem_btree
+
+Se debe realizar esta funcion ya que recibe como parametro una pila, por ende hay que ir sacando elemento por elemento de pila sin perder la pila original
+**/
+
+void sbt_insert_value(btn **node, stack* day_measures, int cmp (t_elem_btree, t_elem_btree))
+{
+    stack* aux_stack = stack_new();
+    t_elems aux;
+
+    while(!stack_isempty(day_measures))
+    {
+        aux = stack_pop(day_measures);
+        stack_push(aux_stack,aux);
+        _sbt_insert_value(node,aux,cmp);
+    }
+    while(!stack_isempty(aux_stack))
+    {
+        stack_push(day_measures,stack_pop(aux_stack));
+    }
+}
+
+
+/**
+FUNCION RECURSIVA PARA MOSTRAR LOS ELEMENTOS DE UN ARBOL BT
+**/
+
+void sbt_print_tree(btn* node, char str[])
+{
+    printf("%d\n", node->value.minute);
+
+    //Para el hijo izquierdo
+    if(node->left != NULL)
+    {
+        char str2[1500];
+        strcpy(str2,str);
+
+        if(node->right != NULL)
+        {
+            printf("%s%c%c%c%c%c",str,195,196,196,196,196);
+            char symb = 179;
+            char aux[2];
+
+            aux[0] = symb;
+            aux[1] = '\0';
+            strcat(str2,aux);
+            strcat(str2,"     ");
+            sbt_print_tree(node->left,str2);
         }
         else
-            result = 0;
-    }
-    return result;
-}
-
-/**
- * Obtiene el puntero al nodo con el valor solicitado de
- * un SBT. (Versión recursiva)
- * Parámetros:
- *          value: el valor que se busca en el SBT.
- *          *node: el puntero al nodo del sub-árbol donde se
- * va a buscar.
- */
-btn* sbt_findr(btn *node, t_elem_btree value, int cmp (t_elem_btree, t_elem_btree))
-{
-    if(node == NULL || cmp(node->value,value)== 0)
-    {
-        return node;
-    }
-    else if(cmp(node->value,value)<0)
-    {
-        return (sbt_findr(node->left,value,cmp));
-    }
-    else
-    {
-        return (sbt_findr(node->right,value,cmp));
-    }
-}
-
-// toStr devuelve el contenido de un nodo como string
-// asume que t_elem_tree es un número entero
-void btn_intToStr(btn* node, char* str) {
-    if (!node) return;
-    sprintf(str, "(%03d %03d)", node->value->temperature , node->value->minute);
-}
-
-/**
- * DE USO INTERNO para dibujar un árbol.
- */
-int _btn_print(btn *tree, int is_left, int offset, int depth, char s[20][255], void toStr (btn*, char*))
-{
-    char b[200];
-    int width = 5;
-
-    if (!tree) return 0;
-    toStr(tree, b);
-    //sprintf(b, "%s", str);
-
-
-    int left = _btn_print(tree->left, 1, offset, depth + 1, s, toStr);
-    int right = _btn_print(tree->right, 0, offset + left + width, depth + 1, s, toStr);
-
-    // for (int i = 0; i < width; i++) s[2 * depth][offset + left + i] = b[i];
-    for (int i = 0; i < strlen(b); i++) s[2 * depth][offset + left + i] = b[i];
-
-    if (depth && is_left)
-    {
-        for (int i = 0; i < width + right; i++)
-            s[2 * depth - 1][offset + left + width / 2 + i] = '-';
-
-        s[2 * depth - 1][offset + left + width / 2] = '+';
-        s[2 * depth - 1][offset + left + width + right + width / 2] = '+';
-
-    }
-    else if (depth && !is_left)
-    {
-        for (int i = 0; i < left + width; i++)
-            s[2 * depth - 1][offset - width / 2 + i] = '-';
-
-        s[2 * depth - 1][offset + left + width / 2] = '+';
-        s[2 * depth - 1][offset - width / 2 - 1] = '+';
-    }
-
-    return left + width + right;
-}
-
-/**
- * Dibuja un árbol binario con caracteres
- * (Los valores de los nodos deben estar entre 0 y 999).
- */
-void btn_print(btn *tree, void toStr (btn*, char*))
-{
-    char s[20][255];
-    for (int i = 0; i < 20; i++) sprintf(s[i], "%80s", " ");
-
-    _btn_print(tree, 0, 0, 0, s, toStr);
-
-    for (int i = 0; i < 20; i++)
-    {
-        int j = 0;
-        while (s[i][j] != '\0' && s[i][j] == ' ')
         {
-            j++;
-        }
-        if (s[i][j] != '\0')
-        {
-            printf("%s\n", s[i]);
+            printf("%s%c%c%c%c%c",str,195,196,196,196,196);
+            strcat(str2,"     ");
+            sbt_print_tree(node->left,str2);
         }
     }
+    //Para el hijo derecho
+    if(node->right != NULL)
+    {
+        char str3[1500];
+        strcpy(str3,str);
+        printf("%s%c%c%c%c%c",str,195,196,196,196,196);
+        strcat(str3,"     ");
+        sbt_print_tree(node->right,str3);
+    }
+}
+
+void sbt_show_tree(btn* root)
+{
+    if(root == NULL)
+    {
+        printf("El arbol esta vacio\n");
+    }
+    else sbt_print_tree(root,"");
 }

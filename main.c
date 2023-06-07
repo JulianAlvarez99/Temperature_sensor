@@ -6,13 +6,10 @@
 #include "search_bt.h"
 #include "temperature_sensor.h"
 
-/***
--LA FUNCION sbt_insert_value(..) [LINEA 21] ME TIRA UN ERROR DE QUE HAGO UN CASTEO DE UN PUNTERO PARA UN ENTERO, NO SE A QUE SE DEBE
-EL WARNING SI EL TIPO DE DATO ES EL TIPO READING*
-
--AL MOMENTO DE DEBUGGEAR EL PROGRAMA ME PARA EN LA FUNCION DE ENQUEUE (QUEUE_STATIC.C) CUANDO VALIDA SI LA COLA ESTA COMPLETA.
-SI YO HAGO UN LLAMADO A LA FUNCION QUEUE_NEW CUANDO CREO MI VARIABLE LINE_MEASURES EL PROGRAMA CORRE CORRECTAMENTE PERO AL MOMENTO DE HACER UN PRINT
-DE LA COLA SOLO ME IMPRIME UN CERO***/
+/**CAMBIÉ LOS T_ELEM DE TODAS LAS ESTRUCTURAS, EN VEZ DE SER READING* LO LLAMÉ READING  **/
+/**SE CORRIGIÓ EL PARAMETRO DE sbt_insert_value, AHORA PASA LA PILA ENTERA A UNA FUNCION QUE LLAMA A OTRA ENMASCARADA*/
+/** SE AGREGÓ UNA NUEVA FUNCION DE IMPRESION PARA EL SBT **/
+/** CODIGO FUNCIONANDO CORRECTAMENTE **/
 
 int main()
 {
@@ -21,15 +18,19 @@ int main()
     btn* tree_measures = NULL;
     queue* line_measures = queue_new(1440);
 
+    day_measures = stack_set_temperature();
 
-    stack_set_temperature(&day_measures);
+    stack_print(day_measures); /// PILA CORRECTA
 
-    stack_print(day_measures); /// imprime el mismo valor
+    sll_add_day_measures(&week_measures,day_measures); /// LISTA CORRECTA
 
-    sll_add_day_measures(&week_measures,day_measures);
-    sbt_insert_value(&tree_measures,stack_top(day_measures),btn_measures_cmp); /***/ ///SE MODIFICÓ EL PARAMETRO 3 DE ESTA FUNCION
+    sbt_insert_value(&tree_measures,day_measures,btn_measures_cmp);
+
+    sbt_show_tree(tree_measures); /// ARBOL CORRECTO
+
     queue_measures_soarted(&line_measures,tree_measures);
-    queue_print(line_measures);
+
+    queue_print(line_measures); /// COLA CORRECTA
 
     queue_free(line_measures);
     btn_free(&tree_measures);
@@ -39,5 +40,5 @@ int main()
     return 0;
 }
 
-/*printf("\n%10s: \n", "Arbol");
-    btn_print(root, btn_intToStr);*/
+
+

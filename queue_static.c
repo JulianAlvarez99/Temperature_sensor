@@ -3,6 +3,10 @@
 #include "queue_static.h"
 #include "search_bt.h"
 
+/**
+Crea una nueva cola
+**/
+
 queue* queue_new(int maxsize)
 {
     queue* q = (queue*)malloc(sizeof(queue));
@@ -14,21 +18,26 @@ queue* queue_new(int maxsize)
     return q;
 }
 
+/**
+Libera una cola
+**/
 void queue_free (queue* q)
 {
     free(q->a);
     free(q);
 }
 
+/**
+Devuelve el tamaño total de una cola
+**/
 int queue_getmaxsize(queue* q)
 {
     return q->maxsize;
 }
 
-int queue_getsize(queue* q)
-{
-    return q->count;
-}
+/**
+Chequea si la cola esta llena, devuelve un entero para confirmar
+**/
 
 int queue_isfull (queue* q)
 {
@@ -36,11 +45,19 @@ int queue_isfull (queue* q)
     //return q->count == q->maxsize;
 }
 
+/**
+Chequea si la cola esta vacia, devuelve un entero para confirmar
+**/
+
 int queue_isempty (queue* q)
 {
     return (q->count == 0)?1:0;
     //return q->count == 0;
 }
+
+/**
+Inserta un t_elemq en la cola
+**/
 
 void enqueue (queue* q, t_elemq elem)
 {
@@ -54,6 +71,10 @@ void enqueue (queue* q, t_elemq elem)
     q->tail = (q->tail+1)%(q->maxsize);
     q->count++;
 }
+
+/**
+Remueve un t_elemq en la cola, retorna el t_elemq removido
+**/
 
 t_elemq dequeue (queue* q)
 {
@@ -70,15 +91,9 @@ t_elemq dequeue (queue* q)
     return result;
 }
 
-t_elemq peek (queue* q)
-{
-    if (queue_isempty(q))
-    {
-        printf("Queue underflow\n");
-        exit(1);
-    }
-    return q->a[q->head];
-}
+/**
+Imprime una cola
+**/
 
 void queue_print(queue* q)
 {
@@ -88,11 +103,16 @@ void queue_print(queue* q)
 
     while(!queue_isempty(aux))
     {
-        printf("%d", q->head);
+        printf("%d ", q->head);
         dequeue(aux);
     }
     printf("\n\n");
 }
+
+/**
+Inserta todos los t_elem de un arbol binario de busqueda en una cola de manera ordenada ascendente por minuto
+Se insertan en in-orden
+**/
 
 void queue_measures_soarted(queue** queue_measures, btn* node)
 {
@@ -101,7 +121,6 @@ void queue_measures_soarted(queue** queue_measures, btn* node)
     queue_measures_soarted(queue_measures, node->left);
     enqueue(*queue_measures, node->value);
     queue_measures_soarted(queue_measures, node->right);
-
 }
 
 
